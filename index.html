@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .counter-container {
+            text-align: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .counter {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        .url {
+            font-size: 18px;
+            color: #7f8c8d;
+            word-break: break-all;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter-container">
+        <h1>Visit Counter</h1>
+        <div class="url">Tracking visits to:<br>https://nooralam867.github.io/Lift-voice-/</div>
+        <div class="counter" id="visitCount">0</div>
+        
+        <h2>Visit History</h2>
+        <table id="visitTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="visitTableBody">
+                <!-- Visits will be added here -->
+            </tbody>
+        </table>
+        
+        <div class="buttons">
+            <button id="resetButton">Reset Counter</button>
+            <button id="exportButton">Export Data</button>
+        </div>
+        
+        <p><small>Note: This uses localStorage so it's browser-specific. Data will persist until cleared.</small></p>
+    </div>
+
+    <script>
+        // Initialize or get visit data from localStorage
+        let visitData = JSON.parse(localStorage.getItem('visitData')) || {
+            url: ' https://nooralam867.github.io/Lift-voice-/',
+            count: 0,
+            visits: []
+        };
+
+        // Check if URL matches
+        if (visitData.url !== 'https://nooralam867.github.io/Lift-voice-/') {
+            visitData = {
+                url: 'https://nooralam867.github.io/Lift-voice-/',
+                count: 0,
+                visits: []
+            };
+        }
+
+        // Record new visit
+        const now = new Date();
+        visitData.count++;
+        visitData.visits.push({
+            date: now.toLocaleDateString(),
+            time: now.toLocaleTimeString(),
+            timestamp: now.getTime()
+        });
+
+        // Save to localStorage
+        localStorage.setItem('visitData', JSON.stringify(visitData));
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('visitCount').textContent = visitData.count;
+            
+            const tableBody = document.getElementById('visitTableBody');
+            tableBody.innerHTML = '';
+            
+            visitData.visits.forEach((visit, index) => {
+                const row = document.createElement('tr');
+                
+                const numberCell = document.createElement('td');
+                numberCell.textContent = index + 1;
+                
+                const dateCell = document.createElement('td');
+                dateCell.textContent = visit.date;
+                
+                const timeCell = document.createElement('td');
+                timeCell.textContent = visit.time;
+                
+                row.appendChild(numberCell);
+                row.appendChild(dateCell);
+                row.appendChild(timeCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Reset function
+        document.getElementById('resetButton').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the visit counter? This cannot be undone.')) {
+                visitData = {
+                    url: 'https://nooralam867.github.io/Lift-voice-/',
+                    count: 0,
+                    visits: []
+                };
+                localStorage.setItem('visitData', JSON.stringify(visitData));
+                updateDisplay();
+            }
+        });
+
+        // Export function
+        document.getElementById('exportButton').addEventListener('click', () => {
+            const dataStr = JSON.stringify(visitData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `visit-data-${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        });
+
+        // Initial display update
+        updateDisplay();
+    </script>
+</body>
+</html>
